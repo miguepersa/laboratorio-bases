@@ -1,0 +1,118 @@
+CREAR USUARIO
+- Insertar una fila en la tabla Usuario con los campos email, nombre, apellido, fecha_de_nacimiento, constraseña y cedula.
+- El campo email debe ser único y no nulo.
+- El campo cedula debe ser único y no nulo.
+
+CREAR PRODUCTO
+- Insertar una fila en la tabla Producto con los campos nombre, stock, precio y descripcion. El campo id es de tipo SERIAL y se genera automaticamente.
+- Si el producto es un instrumento, se inserta una fila en la tabla Instrumento con los campos id_producto, marca y modelo
+- Si el producto es un CD, se inserta una fila en la tabla CD con los campos id_producto, tipo y discografica
+- Si el producto es un accesorio, se inserta una fila en la tabla con el campo id_producto.
+- Para todos los casos anteriores el valor del campo id_producto hace referencia al campo id de la fila creada anteriormente en la tabla Producto.
+- El campo stock no puede ser negativo.
+- El campo precio debe ser mayor o igual a cero.
+
+AUMENTAR STOCK
+- Se actualiza el campo stock de un producto con el nuevo valor
+
+CREAR UNA TRANSACCION
+- Si no existe, crear una fila en la tabla Cliente con el campo email haciendo referencia al campo email de alguna fila en la tabla Usuario
+- Insertar una fila en la tabla Transaccion con los campos n_ref, monto_total, fecha, hora y email_cliente. El campo email_cliente debe hacer referencia al campo email de la fila anteriormente creada en la tabla Cliente.
+- Agregar para cada producto de la transaccion una fila en la tabla Pertenece con el campo id_producto referenciando el campo id del producto, el campo id_transaccion referenciando el campo id de la transaccion creada anteriormente, y la cantidad del producto comprada. Cada producto debe tener un stock mayor a la cantidad comprada en la transaccion. Se actualiza el campo stock del producto con el nuevo valor despues de la transaccion.
+- El campo monto_total debe ser mayor a cero.
+- El campo email_cliente debe hacer referencia a una fila existente en Cliente.
+- Se debe verificar que la cantidad de cada producto en la transacción no exceda el stock disponible.
+
+CREAR PROFESOR
+- Insertar una fila en la tabla Profesor con los campos email, cv, nombre_titulo, grado_titulo, universidad_titulo y fecha_ingreso. El campo email debe hacer referencia al campo email de alguna fila en la tabla Usuario.
+
+CREAR NUEVA CARRERA
+- Insertar una fila en la tabla Carrera con los campos codigo_carrera, nombre, tipo, descripcion, email_coordinador. El campo email_coordinador debe hacer referencia al campo email de alguna fila en la tabla Profesor. 
+
+CREAR NUEVA MATERIA
+- Insertar una fila en la tabla Materia con los campos codigo_materia, nombre, nivel e instrumento y codigo_carrera. El campo codigo_carrera debe hacer referencia al campo codigo_carrera de alguna fila en la tabla Carrera.
+
+CREAR PENSUM
+- Para cada materia de una carrera, se crea una fila en la tabla Tiene con los campos codigo_materia haciendo referencia al campo codigo_materia de la fila en la tabla Materia, y codigo_carrera  haciendo referencia al campo codigo_carrera de la fila en la tabla Carrera
+- Para cada requisito de una materia, se crea una fila en la tabla Prela con los campos codigo_prela haciendo referencia a la materia requisito, y codigo_prelada haciendo referencia a la materia que requiere el requisito
+- Verificar que la materia exista antes de crear la relación en De y Prela.
+
+CREAR CURSO
+- Insertar una fila en la tabla Curso con los campos codigo_materia, seccion, fecha_inicio, fecha_fin, horario, email_profesor. El campo codigo_materia debe hacer referencia al campo codigo_materia de alguna fila en la tabla Materia. El campo email_profesor debe hacer referencia al campo email de alguna fila en la tabla Profesor. 
+
+REGISTRO DE CLIENTES
+- Los clientes deben registrarse proporcionando email, se inserta en la tabla clientes.
+- El email debe hacer referencia a una fila existente en Usuario.
+
+REGISTRO DE ESTUDIANTE
+- Los clientes pueden registrarse como estudiantes proporcionando email. El email debe hacer referencia a una fila existente en Usuario.
+
+INSCRIBIR ESTUDIANTE A UNA CARRERA
+- Para inscribirse en una carrera, ésta debe tener al menos una materia asociada
+- Si no existe, crear una fila en la tabla Estudiante con el campo email haciendo referencia al campo email de alguna fila en la tabla Usuario
+- Insertar una fila en la tabla Estudia con los campos email_estudiante, codigo_carrera y fecha_inicio. El campo email_estudiante debe hacer referencia al campo email de la fila anteriormente creada en la tabla Estudiante.
+- El estudiante debe haber aprobado las materias que son requisito para la materia a inscribir.
+
+INSCRIBIR ESTUDIANTE A UN CURSO
+- El estudiante debe estar inscrito en la carrera asociada a la materia en la tabla Tiene
+- El estudiante debe haber aprobado todas las materias que son requisito de la materia a inscribir. Es decir, para cada requisito de la materia debe existir una fila en la tabla Inscribe que asocie al estudiante con algun curso cuyo campo codigo_carrera sea el de la materia requisisto y cuyo campo nota sea mayor a 2
+- Insertar una fila en la tabla Inscribe con los campos email_estudiante, codigo_materia, seccion y fecha_inicio. El campo email_estudiante debe hacer referencia al campo email de la fila anteriormente creada en la tabla Estudiante. Los campos codigo_materia, seccion y fecha_inicio deben hacer referencia a una misma fila en la tabla Curso
+
+CALIFICAR ESTUDIANTE
+- Actualizar el campo nota de una fila en la tabla Incribe con la nota del estudiante en el curso
+- La nota debe ser un valor entre 1 y 5.
+
+CALIFICAR PROFESOR
+- Actualizar el campo calificacion_prof de una fila en la tabla Incribe con la calificacion que el estudiante le dio al profesor
+- La calificación debe ser un valor entre 1 y 5.
+
+CAMBIAR PROFESOR
+- Se actualiza el campo email_profesor de una fila en la tabla curso con un nuevo valor que hace referencia al campo email de una fila de la tabla Profesor
+
+CAMBIAR COORDINADOR
+- Se actualiza el campo email_coordinador de una fila en la tabla carrera con un nuevo valor que hace referencia al campo email de una fila de la tabla Profesor
+
+GRADUARSE
+- Para poder graduarse un estudiante debe haber aprobado todas las materias de una carrera. Es decir, un estudiante debe estar asociado a una carrera en la tabla Estudia y, para cada materia asociada a la carrera, debe existir un curso asociado a la materia y el estudiante cuyo campo de nota es mayor a 2
+- Se actualiza la fila correspondiente del campo Estudia actualizando el valor del campo fecha_fin con la fecha de graduacion.
+
+CREAR CATEGORIA
+- Verificar existencia: Asegúrate de que no exista una categoría con el mismo nombre en la tabla Categoria.
+- Insertar fila: Inserta una nueva fila en la tabla Categoria con el campo nombre.
+- El campo nombre debe ser único y no nulo.
+
+CREAR PRODUCTO
+- Se inserta una fila en la tabla Producto con nombre, stock, precio y descripción. Insertar en las tablas correspondientes (Instrumento, CD, Accesorio) dependiendo del tipo de producto.
+- El id del producto es generado automáticamente (SERIAL).
+
+ACTUALIZAR STOCK
+- Se actualiza el campo stock de un producto con el nuevo valor.
+- El stock no puede ser negativo.
+
+ASIGNAR CATEGORIA A MATERIA
+- La categoria a asignar debe existir en la tabla Categoria.
+- La materia a la que se asigna la categoria ya debe existir en la tabla Materia.
+- Se inserta una nueva fila en la tabla "De" con los campos nombre_categoria y codigo_materia.
+- nombre_categoria debe hacer referencia a una fila existente en la tabla Categoria.
+- codigo_materia debe hacer referencia a una fila existente en la tabla Materia.
+
+ASIGNAR CATEGORIA A INSTRUMENTO
+- La categoria a asignar debe existir en la tabla Categoria.
+- El instrumento al que se le asignara la categoria debe existir en la tabla Instrumento.
+- Se inserta una nueva fila en la tabla Esta_en con los campos id_instrumento y nombre_categoria.
+- id_instrumento debe hacer referencia a una fila existente en la tabla Instrumento.
+- nombre_categoria debe hacer referencia a una fila existente en la tabla Categoria.
+
+ASIGNAR GENERO A CD
+- Se verifica que el CD ya exista en la tabla CD.
+- Se verifica que el genero no esté ya asignado a ese CD en la tabla Genero.
+- Se inserta una nueva fila en la tabla Genero con los campos id_CD y nombre_genero.
+- El campo id_CD debe hacer referencia a una fila existente en la tabla Producto y debe ser un CD.
+- El campo nombre_genero debe ser único para cada id_CD.
+
+ASIGNAR ARTISTA A CD
+- Verificar existencia de CD: Asegúrate de que el CD ya exista en la tabla CD.
+- Verificar existencia de artista: Asegúrate de que el artista no esté ya asignado a ese CD en la tabla Artista.
+- Insertar fila: Inserta una nueva fila en la tabla Artista con los campos id_CD y nombre_artista.
+- El campo id_CD debe hacer referencia a una fila existente en la tabla Producto y debe ser un CD.
+- El campo nombre_artista debe ser único para cada id_CD.
