@@ -9,14 +9,20 @@ CREATE TABLE Usuario (
 );
 
 CREATE TABLE Profesor (
-    email   VARCHAR(254)    NOT NULL,
-    cv   VARCHAR(128) NOT NULL, -- se guarda un enlace al CV Google Drive o un Bucket S3
-    nombre_titulo   VARCHAR(32)    NOT NULL,
-    grado_titulo    VARCHAR(32) NOT NULL,
-    universidad_titulo VARCHAR(32)  NOT NULL,
-    fecha_ingreso   DATE    NOT NULL,
+    email           VARCHAR(254)    NOT NULL,
+    cv              VARCHAR(128)    NOT NULL, -- se guarda un enlace al CV Google Drive o un Bucket S3
+    fecha_ingreso   DATE            NOT NULL,
     PRIMARY KEY (email),
     FOREIGN KEY (email) REFERENCES Usuario(email)    ON DELETE CASCADE ON UPDATE CASCADE 
+);
+
+CREATE TABLE Titulo (
+    email_profesor      VARCHAR(254)    NOT NULL,
+    nombre_titulo       VARCHAR(128)    NOT NULL,
+    grado_titulo        VARCHAR(128)    NOT NULL,
+    universidad_titulo  VARCHAR(128)    NOT NULL,
+    PRIMARY KEY (email_profesor, nombre_titulo, grado_titulo, universidad_titulo),
+    FOREIGN KEY (email_profesor)
 );
 
 CREATE TABLE Cliente (
@@ -36,10 +42,10 @@ CREATE TABLE Carrera (
     codigo_carrera  VARCHAR(16)   NOT NULL,
     nombre  VARCHAR(16)   NOT NULL,
     tipo    VARCHAR(16) NOT NULL,
-    descripcion  VARCHAR(128) NOT NULL,
+    descripcion  TEXT NOT NULL,
     email_coordinador VARCHAR(254),
     PRIMARY KEY (codigo_carrera),
-    FOREIGN KEY (email_coordinador) REFERENCES Profesor(email) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (email_coordinador) REFERENCES Profesor(email) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
 CREATE TABLE Materia (
@@ -47,7 +53,6 @@ CREATE TABLE Materia (
     codigo_carrera   VARCHAR(16)   NOT NULL,
     nombre  VARCHAR(16)   NOT NULL,
     nivel   VARCHAR(16)    NOT NULL,
-    instrumento  VARCHAR(128) NOT NULL,
     PRIMARY KEY (codigo_materia),
     FOREIGN KEY (codigo_carrera) REFERENCES Carrera(codigo_carrera) ON DELETE SET NULL ON UPDATE CASCADE
 );
@@ -65,10 +70,10 @@ CREATE TABLE Curso (
 );
 
 CREATE TABLE Producto (
-    id  SERIAL   NOT NULL,
+    id  INT GENERATED ALWAYS AS IDENTITY,
     nombre   VARCHAR(32)  NOT NULL,
     stock    INT   NOT NULL DEFAULT 0 CHECK (stock >= 0),
-    precio   INT  NOT NULL CHECK (stock >= 0),
+    precio   DECIMAL(10,2)  NOT NULL CHECK (precio >= 0),
     descripcion TEXT NOT NULL,
     PRIMARY KEY (id)
 );
@@ -91,6 +96,7 @@ CREATE TABLE CD (
 
 CREATE TABLE Accesorio (
     id_producto  INT   NOT NULL,
+    marca        VARCHAR(32) NOT NULL,
     PRIMARY KEY (id_producto),
     FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE CASCADE
 );
@@ -104,7 +110,7 @@ CREATE TABLE Compatible (
 );
 
 CREATE TABLE Transaccion (
-    id  SERIAL   NOT NULL,
+    id  INT GENERATED ALWAYS AS IDENTITY,
     n_ref    INT   NOT NULL UNIQUE,
     monto_total INT  NOT NULL,
     fecha    DATE   NOT NULL,
@@ -118,8 +124,9 @@ CREATE TABLE Pertenece (
     id_producto INT  NOT NULL,
     id_transaccion INT  NOT NULL,
     cantidad    INT DEFAULT 1 CHECK (cantidad > 0),
+    precio      INT NOT NULL,
     PRIMARY KEY (id_producto, id_transaccion),
-    FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE CASCADE,
+    FOREIGN KEY (id_producto) REFERENCES Producto(id) ON DELETE NO ACTION,
     FOREIGN KEY (id_transaccion) REFERENCES Transaccion(id) ON DELETE CASCADE
 );
 
@@ -166,8 +173,8 @@ CREATE TABLE Estudia (
     fecha_inicio    DATE     NOT NULL,
     fecha_fin    DATE,
     PRIMARY KEY (email_estudiante, codigo_carrera),
-    FOREIGN KEY (email_estudiante) REFERENCES Estudiante(email) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (codigo_carrera) REFERENCES Carrera(codigo_carrera) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (email_estudiante) REFERENCES Estudiante(email) ON DELETE NO ACTION ON UPDATE CASCADE,
+    FOREIGN KEY (codigo_carrera) REFERENCES Carrera(codigo_carrera) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
 CREATE TABLE Inscribe (
@@ -187,12 +194,12 @@ CREATE TABLE Genero (
     id_CD   INT    NOT NULL,
     nombre_genero VARCHAR(32)   NOT NULL,
     PRIMARY KEY (id_CD, nombre_genero),
-    FOREIGN KEY (id_CD) REFERENCES Producto(id)
+    FOREIGN KEY (id_CD) REFERENCES Producto(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Artista (
     id_CD    INT   NOT NULL,
     nombre_artista VARCHAR(32)  NOT NULL,
     PRIMARY KEY (id_CD, nombre_artista),
-    FOREIGN KEY (id_CD) REFERENCES Producto(id)
+    FOREIGN KEY (id_CD) REFERENCES Producto(id) ON DELETE CASCADE
 );
