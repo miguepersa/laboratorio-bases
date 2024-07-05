@@ -7,7 +7,7 @@ CREAR PRODUCTO
 - Insertar una fila en la tabla Producto con los campos nombre, stock, precio y descripcion. El campo id es de tipo SERIAL y se genera automaticamente.
 - Si el producto es un instrumento, se inserta una fila en la tabla Instrumento con los campos id_producto, marca y modelo
 - Si el producto es un CD, se inserta una fila en la tabla CD con los campos id_producto, tipo y discografica
-- Si el producto es un accesorio, se inserta una fila en la tabla con el campo id_producto.
+- Si el producto es un accesorio, se inserta una fila en la tabla con el campo id_producto, marca
 - Para todos los casos anteriores el valor del campo id_producto hace referencia al campo id de la fila creada anteriormente en la tabla Producto.
 - El campo stock no puede ser negativo.
 - El campo precio debe ser mayor o igual a cero.
@@ -24,7 +24,7 @@ CREAR UNA TRANSACCION
 - Se debe verificar que la cantidad de cada producto en la transacción no exceda el stock disponible.
 
 CREAR PROFESOR
-- Insertar una fila en la tabla Profesor con los campos email, cv, nombre_titulo, grado_titulo, universidad_titulo y fecha_ingreso. El campo email debe hacer referencia al campo email de alguna fila en la tabla Usuario.
+- Insertar una fila en la tabla Profesor con los campos email, cv y fecha_ingreso. El campo email debe hacer referencia al campo email de alguna fila en la tabla Usuario. Para cada titulo del profesor se inserta una fila en la tabla Titulo con valores email_profesor, nombre_titulo, grado_titulo, universidad_titulo, donde email_profesor hace referencia al profesor.
 
 CREAR NUEVA CARRERA
 - Insertar una fila en la tabla Carrera con los campos codigo_carrera, nombre, tipo, descripcion, email_coordinador. El campo email_coordinador debe hacer referencia al campo email de alguna fila en la tabla Profesor. 
