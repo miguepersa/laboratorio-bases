@@ -12,7 +12,7 @@ CREAR PRODUCTO
 - El campo stock no puede ser negativo.
 - El campo precio debe ser mayor o igual a cero.
 
-AUMENTAR STOCK
+ACTUALIZAR STOCK
 - Se actualiza el campo stock de un producto con el nuevo valor
 
 CREAR UNA TRANSACCION

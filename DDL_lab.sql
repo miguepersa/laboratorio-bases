@@ -194,12 +194,12 @@ CREATE TABLE Genero (
     id_CD   INT    NOT NULL,
     nombre_genero VARCHAR(32)   NOT NULL,
     PRIMARY KEY (id_CD, nombre_genero),
-    FOREIGN KEY (id_CD) REFERENCES Producto(id) ON DELETE CASCADE
+    FOREIGN KEY (id_CD) REFERENCES CD(id) ON DELETE CASCADE
 );
 
 CREATE TABLE Artista (
     id_CD    INT   NOT NULL,
     nombre_artista VARCHAR(32)  NOT NULL,
     PRIMARY KEY (id_CD, nombre_artista),
-    FOREIGN KEY (id_CD) REFERENCES Producto(id) ON DELETE CASCADE
+    FOREIGN KEY (id_CD) REFERENCES CD(id) ON DELETE CASCADE
 );
