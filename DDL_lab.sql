@@ -22,7 +22,7 @@ CREATE TABLE Titulo (
     grado_titulo        VARCHAR(128)    NOT NULL,
     universidad_titulo  VARCHAR(128)    NOT NULL,
     PRIMARY KEY (email_profesor, nombre_titulo, grado_titulo, universidad_titulo),
-    FOREIGN KEY (email_profesor)
+    FOREIGN KEY (email_profesor) REFERENCES Profesor(email)    ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE Cliente (
@@ -194,12 +194,12 @@ CREATE TABLE Genero (
     id_CD   INT    NOT NULL,
     nombre_genero VARCHAR(32)   NOT NULL,
     PRIMARY KEY (id_CD, nombre_genero),
-    FOREIGN KEY (id_CD) REFERENCES CD(id) ON DELETE CASCADE
+    FOREIGN KEY (id_CD) REFERENCES CD(id_producto) ON DELETE CASCADE
 );
 
 CREATE TABLE Artista (
     id_CD    INT   NOT NULL,
     nombre_artista VARCHAR(32)  NOT NULL,
     PRIMARY KEY (id_CD, nombre_artista),
-    FOREIGN KEY (id_CD) REFERENCES CD(id) ON DELETE CASCADE
+    FOREIGN KEY (id_CD) REFERENCES CD(id_producto) ON DELETE CASCADE
 );
