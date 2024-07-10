@@ -81,14 +81,6 @@ CREAR CATEGORIA
 - Insertar fila: Inserta una nueva fila en la tabla Categoria con el campo nombre.
 - El campo nombre debe ser único y no nulo.
 
-CREAR PRODUCTO
-- Se inserta una fila en la tabla Producto con nombre, stock, precio y descripción. Insertar en las tablas correspondientes (Instrumento, CD, Accesorio) dependiendo del tipo de producto.
-- El id del producto es generado automáticamente (SERIAL).
-
-ACTUALIZAR STOCK
-- Se actualiza el campo stock de un producto con el nuevo valor.
-- El stock no puede ser negativo.
-
 ASIGNAR CATEGORIA A MATERIA
 - La categoria a asignar debe existir en la tabla Categoria.
 - La materia a la que se asigna la categoria ya debe existir en la tabla Materia.
