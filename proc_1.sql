@@ -1,3 +1,10 @@
+-- Crear un nuevo usuario
+    -- email   (VARCHAR(254)) - email del usuario
+    -- nombre  (VARCHAR(32)) - nombre del usuario
+    -- apellido     (VARCHAR(32)) - apellido del usuario
+    -- cedula  (INT) - cedula de identidad del usuario
+    -- fecha_nacimiento (DATE) - fecha de nacimiento del usuario
+    -- contrasenia  (VARCHAR(32)) - contrasenia del usuario
 CREATE PROCEDURE Crear_Usuario(
     email   VARCHAR(254),
     nombre  VARCHAR(32),
@@ -15,12 +22,19 @@ BEGIN
 END
 $$;
 
+
+-- Crear un nuevo producto
+    -- nombre   (VARCHAR(32)) - nombre del producto
+    -- stock    (INT) - stock inicial del producto
+    -- precio   (DECIMAL(10,2)) - precio inicial del producto
+    -- descripcion (TEXT) - descripcion del producto
+    -- INOUT id_producto (INT) - id del producto creado
 CREATE PROCEDURE Crear_Producto (
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
     descripcion TEXT,
-    OUT id_producto INT
+    INOUT id_producto INT
 )
 LANGUAGE plpgsql
 AS $$
@@ -32,6 +46,14 @@ BEGIN
 END
 $$;
 
+--Crear nuevo producto de tipo instrumento y categoria asociada
+        -- nombre   (VARCHAR(32)) - nombre del instrumento
+        -- stock    (INT) - stock inicial del instrumento
+        -- precio   (DECIMAL(10,2)) - precio del instrumento
+        -- descripcion (TEXT) - descripcion del instrumento
+        -- marca (VARCHAR(32)) - marca del instrumento
+        -- modelo (VARCHAR(32)) - modelo del instrumento
+        -- categoria (VARCHAR(32)) - categoria del instrumento
 CREATE PROCEDURE Crear_Instrumento(
     nombre   VARCHAR(32),
     stock    INT,
@@ -57,6 +79,9 @@ BEGIN
 END;
 $$;
 
+--asociar una categoria a un instrumento
+    -- id_instrumento    INT - id del instrumento
+    -- nombre_categoria VARCHAR(32) - categoria a asociar
 CREATE PROCEDURE Asignar_Categoria_a_Instrumento(
     id_instrumento    INT,
     nombre_categoria VARCHAR(32)
@@ -70,6 +95,16 @@ BEGIN
 END;
 $$;
 
+
+--Crear nuevo producto de tipo CD con genero y artista asociados
+        -- nombre   (VARCHAR(32)) - nombre del CD
+        -- stock    (INT) - stock inicial del CD
+        -- precio   (DECIMAL(10,2)) - precio del CD
+        -- descripcion (TEXT) - descripcion del CD
+        -- tipo (VARCHAR(8)) - tipo del CD
+        -- discografica (VARCHAR(32)) - discografica del CD
+        -- nombre_genero (VARCHAR(32)) - genero del CD
+        -- nombre_artista (VARCHAR(32)) - artista del CD
 CREATE PROCEDURE Crear_CD(
     nombre   VARCHAR(32),
     stock    INT,
@@ -94,6 +129,9 @@ BEGIN
 END
 $$;
 
+-- guardar un genero para un CD
+    -- id_CD   INT, - id del CD
+    -- nombre_genero VARCHAR(32) - nombre del genero del CD
 CREATE PROCEDURE Crear_Genero(
     id_CD   INT,
     nombre_genero VARCHAR(32)
@@ -107,6 +145,9 @@ BEGIN
 END
 $$;
 
+-- guardar un artista para un CD
+    -- id_CD   INT, - id del CD
+    -- nombre_artista VARCHAR(32) - nombre del artista del CD
 CREATE PROCEDURE Crear_Artista(
     id_CD   INT,
     nombre_artista VARCHAR(32)
@@ -120,12 +161,20 @@ BEGIN
 END
 $$;
 
+--Crear nuevo producto de tipo accesorio con instrumento asociado
+        -- nombre   (VARCHAR(32)) - nombre del accesorio
+        -- stock    (INT) - stock inicial del accesorio
+        -- precio   (DECIMAL(10,2)) - precio del accesorio
+        -- descripcion (TEXT) - descripcion del accesorio
+        -- marca (VARCHAR(8)) - marca del accesorio
+        -- id_instrumento (VARCHAR(32)) - id del instrumento asociado al accesorio
 CREATE PROCEDURE Crear_Accesorio(
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
     descripcion TEXT,
-    marca VARCHAR(32)
+    marca VARCHAR(32),
+    id_instrumento INT
 )
 LANGUAGE plpgsql
 AS $$
@@ -136,23 +185,16 @@ BEGIN
     INSERT INTO Accesorio VALUES (
         id_producto, marca
     );
-
-END
-$$;
-
-CREATE PROCEDURE Asociar_Accesorio_a_Instrumento(
-    id_instrumento INT,
-    id_accesorio INT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
     INSERT INTO Compatible VALUES (
-        id_instrumento, id_accesorio
+        id_instrumento, id_producto
     );
+
 END
 $$;
 
+--actualizar el stock de un producto
+    -- id_producto INT - producto a alterar
+    -- valor INT - nuevo stock del producto
 CREATE PROCEDURE Actualizar_Stock(
     id_producto INT,
     valor INT
@@ -166,6 +208,28 @@ BEGIN
 END
 $$;
 
+--actualizar el precio de un producto
+    -- id_producto INT - producto a alterar
+    -- precio INT - nuevo precio del producto
+CREATE PROCEDURE Actualizar_precio (
+    id_producto  INT,
+    precio   DECIMAL(10,2)
+
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE Producto
+    SET Producto.precio = precio
+    WHERE id = id_producto;
+END
+$$;
+
+--crear una nueva transaccion
+    -- n_ref    INT-  numero de referencia de la transaccion
+    -- email_cliente VARCHAR(254) - email del cliente que realiza la transaccion
+    -- id_productos INT[] - arreglo de los ids de los productos de la transaccion
+    -- cantidades INT[] - arrelgo de las cantidades de los productos de la transaccion
 CREATE PROCEDURE Crear_Transaccion(
     n_ref    INT,
     email_cliente VARCHAR(254),
@@ -206,22 +270,29 @@ BEGIN
 END
 $$; 
 
-
+--crear un nuevo profesor
+    -- email           VARCHAR(254) - email del profesor
+    -- cv              VARCHAR(128) - cv del profesor
+    -- fecha_ingreso   DATE -
 CREATE PROCEDURE Crear_Profesor(
     email           VARCHAR(254),
-    cv              VARCHAR(128), 
-    fecha_ingreso   DATE
+    cv              VARCHAR(128)
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO Profesor VALUES (
-        email, cv, fecha_ingreso
+        email, cv, CURRENT_DATE
     );
 END
 $$;
 
-
+--crear una nueva carrera
+    -- codigo_carrera  VARCHAR(16) - codigo identificador de la carrera
+    -- nombre  VARCHAR(16) - nombre de la carrera
+    -- tipo    VARCHAR(16) - tipo de la carrera
+    -- descripcion  TEXT - descripcion de la carrera
+    -- email_coordinador VARCHAR(254) - email del profesor coordinador de la carrera
 CREATE PROCEDURE Crear_Carrera(
     codigo_carrera  VARCHAR(16),
     nombre  VARCHAR(16),
@@ -238,7 +309,12 @@ BEGIN
 END
 $$;
 
-
+--crear una nueva materia y su categoria asociada
+    -- codigo_materia  VARCHAR(16) - codigo identificador de la materia
+    -- codigo_carrera   VARCHAR(16) - codigo de la carrera a la que pertenece la materia
+    -- nombre  VARCHAR(16) - nombre de la materia
+    -- nivel   VARCHAR(16) - nivel de la materia
+    -- categoria VARCHAR(32) -categoria asociada a la materia
 CREATE PROCEDURE Crear_Materia(
     codigo_materia  VARCHAR(16),
     codigo_carrera   VARCHAR(16),
@@ -259,6 +335,9 @@ BEGIN
 END
 $$;
 
+--asignar una categoria a una materia
+    -- codigo_materia  VARCHAR(16) - codigo de la materia
+    -- nombre_categoria VARCHAR(32) - categoria a asociar
 CREATE PROCEDURE Asignar_Categoria_a_Materia(
     codigo_materia  VARCHAR(16),
     nombre_categoria VARCHAR(32)
@@ -272,7 +351,9 @@ BEGIN
 END;
 $$;
 
-
+--establecer una relacion de prelacion entre dos materias
+    -- codigo_prela    VARCHAR(16) - codigo de la materia requisito
+    -- codigo_prelada  VARCHAR(16)  - codigo de la materia prelada 
 CREATE PROCEDURE Prelar (
     codigo_prela    VARCHAR(16),
     codigo_prelada  VARCHAR(16)   
