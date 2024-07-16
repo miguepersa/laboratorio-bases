@@ -5,7 +5,7 @@
     -- cedula  (INT) - cedula de identidad del usuario
     -- fecha_nacimiento (DATE) - fecha de nacimiento del usuario
     -- contrasenia  (VARCHAR(32)) - contrasenia del usuario
-CREATE PROCEDURE Crear_Usuario(
+CREATE OR REPLACE PROCEDURE Crear_Usuario(
     email   VARCHAR(254),
     nombre  VARCHAR(32),
     apellido     VARCHAR(32),
@@ -29,7 +29,7 @@ $$;
     -- precio   (DECIMAL(10,2)) - precio inicial del producto
     -- descripcion (TEXT) - descripcion del producto
     -- INOUT id_producto (INT) - id del producto creado
-CREATE PROCEDURE Crear_Producto (
+CREATE OR REPLACE PROCEDURE Crear_Producto (
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
@@ -54,14 +54,14 @@ $$;
         -- marca (VARCHAR(32)) - marca del instrumento
         -- modelo (VARCHAR(32)) - modelo del instrumento
         -- categoria (VARCHAR(32)) - categoria del instrumento
-CREATE PROCEDURE Crear_Instrumento(
+CREATE OR REPLACE PROCEDURE Crear_Instrumento(
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
     descripcion TEXT,
     marca VARCHAR(32),
     modelo VARCHAR(32),
-    categoria VARCHAR(32)
+    categorias VARCHAR(32)[]
 )
 LANGUAGE plpgsql
 AS $$
@@ -72,17 +72,20 @@ BEGIN
     INSERT INTO Instrumento VALUES (
         id_producto, marca, modelo
     );
-    IF NOT EXISTS (SELECT * FROM Categoria WHERE nombre = categoria) THEN
-        CALL Crear_Categoria(categoria)
-    END IF;
-    CALL Asignar_Categoria_a_Instrumento(id_producto, categoria);
+
+    FOR i IN 1..array_length(categorias) LOOP
+        IF NOT EXISTS (SELECT * FROM Categoria WHERE nombre = categorias[i]) THEN
+            CALL Crear_Categoria(categorias[i]);
+        END IF;
+        CALL Asignar_Categoria_a_Instrumento(id_producto, categorias[i]);
+    END LOOP;
 END;
 $$;
 
 --asociar una categoria a un instrumento
     -- id_instrumento    INT - id del instrumento
     -- nombre_categoria VARCHAR(32) - categoria a asociar
-CREATE PROCEDURE Asignar_Categoria_a_Instrumento(
+CREATE OR REPLACE PROCEDURE Asignar_Categoria_a_Instrumento(
     id_instrumento    INT,
     nombre_categoria VARCHAR(32)
 )
@@ -105,7 +108,7 @@ $$;
         -- discografica (VARCHAR(32)) - discografica del CD
         -- nombre_genero (VARCHAR(32)) - genero del CD
         -- nombre_artista (VARCHAR(32)) - artista del CD
-CREATE PROCEDURE Crear_CD(
+CREATE OR REPLACE PROCEDURE Crear_CD(
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
@@ -124,15 +127,15 @@ BEGIN
     INSERT INTO CD VALUES (
         id_producto, tipo, discografica
     );
-    CALL Crear_Genero(id_producto, nombre_genero)
-    CALL Crear_Artista(id_producto, nombre_artista)
+    CALL Crear_Genero(id_producto, nombre_genero);
+    CALL Crear_Artista(id_producto, nombre_artista);
 END
 $$;
 
 -- guardar un genero para un CD
     -- id_CD   INT, - id del CD
     -- nombre_genero VARCHAR(32) - nombre del genero del CD
-CREATE PROCEDURE Crear_Genero(
+CREATE OR REPLACE PROCEDURE Crear_Genero(
     id_CD   INT,
     nombre_genero VARCHAR(32)
 )
@@ -148,7 +151,7 @@ $$;
 -- guardar un artista para un CD
     -- id_CD   INT, - id del CD
     -- nombre_artista VARCHAR(32) - nombre del artista del CD
-CREATE PROCEDURE Crear_Artista(
+CREATE OR REPLACE PROCEDURE Crear_Artista(
     id_CD   INT,
     nombre_artista VARCHAR(32)
 )
@@ -168,7 +171,7 @@ $$;
         -- descripcion (TEXT) - descripcion del accesorio
         -- marca (VARCHAR(8)) - marca del accesorio
         -- id_instrumento (VARCHAR(32)) - id del instrumento asociado al accesorio
-CREATE PROCEDURE Crear_Accesorio(
+CREATE OR REPLACE PROCEDURE Crear_Accesorio(
     nombre   VARCHAR(32),
     stock    INT,
     precio   DECIMAL(10,2),
@@ -195,7 +198,7 @@ $$;
 --actualizar el stock de un producto
     -- id_producto INT - producto a alterar
     -- valor INT - nuevo stock del producto
-CREATE PROCEDURE Actualizar_Stock(
+CREATE OR REPLACE PROCEDURE Actualizar_Stock(
     id_producto INT,
     valor INT
 )
@@ -211,7 +214,7 @@ $$;
 --actualizar el precio de un producto
     -- id_producto INT - producto a alterar
     -- precio INT - nuevo precio del producto
-CREATE PROCEDURE Actualizar_precio (
+CREATE OR REPLACE PROCEDURE Actualizar_precio (
     id_producto  INT,
     precio   DECIMAL(10,2)
 
@@ -230,7 +233,7 @@ $$;
     -- email_cliente VARCHAR(254) - email del cliente que realiza la transaccion
     -- id_productos INT[] - arreglo de los ids de los productos de la transaccion
     -- cantidades INT[] - arrelgo de las cantidades de los productos de la transaccion
-CREATE PROCEDURE Crear_Transaccion(
+CREATE OR REPLACE PROCEDURE Crear_Transaccion(
     n_ref    INT,
     email_cliente VARCHAR(254),
     id_productos INT[],
@@ -274,7 +277,7 @@ $$;
     -- email           VARCHAR(254) - email del profesor
     -- cv              VARCHAR(128) - cv del profesor
     -- fecha_ingreso   DATE -
-CREATE PROCEDURE Crear_Profesor(
+CREATE OR REPLACE PROCEDURE Crear_Profesor(
     email           VARCHAR(254),
     cv              VARCHAR(128)
 )
@@ -293,7 +296,7 @@ $$;
     -- tipo    VARCHAR(16) - tipo de la carrera
     -- descripcion  TEXT - descripcion de la carrera
     -- email_coordinador VARCHAR(254) - email del profesor coordinador de la carrera
-CREATE PROCEDURE Crear_Carrera(
+CREATE OR REPLACE PROCEDURE Crear_Carrera(
     codigo_carrera  VARCHAR(16),
     nombre  VARCHAR(16),
     tipo    VARCHAR(16),
@@ -315,7 +318,7 @@ $$;
     -- nombre  VARCHAR(16) - nombre de la materia
     -- nivel   VARCHAR(16) - nivel de la materia
     -- categoria VARCHAR(32) -categoria asociada a la materia
-CREATE PROCEDURE Crear_Materia(
+CREATE OR REPLACE PROCEDURE Crear_Materia(
     codigo_materia  VARCHAR(16),
     codigo_carrera   VARCHAR(16),
     nombre  VARCHAR(16),
@@ -329,16 +332,16 @@ BEGIN
         codigo_materia, codigo_carrera, nombre, nivel
     );
     IF NOT EXISTS (SELECT * FROM Categoria WHERE nombre = categoria) THEN
-        CALL Crear_Categoria(categoria)
-    END IF
-    CALL Asignar_Categoria_a_Materia(codigo_materia, categoria)
+        CALL Crear_Categoria(categoria);
+    END IF;
+    CALL Asignar_Categoria_a_Materia(codigo_materia, categoria);
 END
 $$;
 
 --asignar una categoria a una materia
     -- codigo_materia  VARCHAR(16) - codigo de la materia
     -- nombre_categoria VARCHAR(32) - categoria a asociar
-CREATE PROCEDURE Asignar_Categoria_a_Materia(
+CREATE OR REPLACE PROCEDURE Asignar_Categoria_a_Materia(
     codigo_materia  VARCHAR(16),
     nombre_categoria VARCHAR(32)
 )
@@ -354,20 +357,25 @@ $$;
 --establecer una relacion de prelacion entre dos materias
     -- codigo_prela    VARCHAR(16) - codigo de la materia requisito
     -- codigo_prelada  VARCHAR(16)  - codigo de la materia prelada 
-CREATE PROCEDURE Prelar (
+CREATE OR REPLACE PROCEDURE Prelar (
     codigo_prela    VARCHAR(16),
     codigo_prelada  VARCHAR(16)   
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
+
+    if (SELECT COUNT(DISTINCT codigo_carrera) FROM Materia WHERE codigo_materia IN (codigo_prelada, codigo_prela)) > 1 THEN
+        RAISE EXCEPTION 'Las materias deben pertenecer a la misma carrera';
+    END IF;
+
     INSERT INTO Prela VALUES (
         codigo_prela, codigo_prelada
     );
 END
 $$;
 
-CREATE PROCEDURE Cambiar_Coordinador(
+CREATE OR REPLACE PROCEDURE Cambiar_Coordinador(
     codigo_carrera  VARCHAR(16),   
     email_coordinador    VARCHAR(254)
 )
@@ -380,7 +388,7 @@ BEGIN
 END
 $$;
 
-CREATE PROCEDURE Graduarse(
+CREATE OR REPLACE PROCEDURE Graduarse(
     email_estudiante  VARCHAR(254),
     codigo_carrera  VARCHAR(16)   
 )
@@ -411,19 +419,33 @@ BEGIN
 END
 $$;
 
-CREATE PROCEDURE Crear_Categoria(
+CREATE OR REPLACE PROCEDURE Crear_Categoria(
     nombre  VARCHAR(32)
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO Categoria VALUES (
-        nombre_artista
+        nombre
     );
 END
 $$;
 
-CREATE PROCEDURE Calificar_Materia(
+
+CREATE OR REPLACE PROCEDURE Crear_Subcategoria(
+    categoria_padre  VARCHAR(32),
+    categoria_hijo  VARCHAR(32)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO Es VALUES (
+        categoria_padre, categoria_hijo
+    );
+END
+$$;
+
+CREATE OR REPLACE PROCEDURE Calificar_Materia(
     email_estudiante  VARCHAR(16),   
     codigo_materia    VARCHAR(254),
     seccion INT,
@@ -438,45 +460,190 @@ BEGIN
     WHERE Inscribe.email_estudiante = email_estudiante
     AND Inscribe.codigo_materia = codigo_materia
     AND Inscribe.seccion = seccion
-    AND Inscribe.fecha_inicio = fecha_inicio
+    AND Inscribe.fecha_inicio = fecha_inicio;
 END
 $$;
 
--- Creacion de indices
 
--- Índices en claves foráneas
-CREATE INDEX idx_profesor_email ON Profesor(email);
-CREATE INDEX idx_cliente_email ON Cliente(email);
-CREATE INDEX idx_estudiante_email ON Estudiante(email);
-CREATE INDEX idx_carrera_email_coordinador ON Carrera(email_coordinador);
-CREATE INDEX idx_materia_codigo_carrera ON Materia(codigo_carrera);
-CREATE INDEX idx_curso_codigo_materia ON Curso(codigo_materia);
-CREATE INDEX idx_curso_email_profesor ON Curso(email_profesor);
-CREATE INDEX idx_transaccion_email_cliente ON Transaccion(email_cliente);
-CREATE INDEX idx_pertenece_id_producto ON Pertenece(id_producto);
-CREATE INDEX idx_pertenece_id_transaccion ON Pertenece(id_transaccion);
-CREATE INDEX idx_esta_en_id_instrumento ON Esta_en(id_instrumento);
-CREATE INDEX idx_esta_en_nombre_categoria ON Esta_en(nombre_categoria);
-CREATE INDEX idx_de_nombre_categoria ON De(nombre_categoria);
-CREATE INDEX idx_de_codigo_materia ON De(codigo_materia);
-CREATE INDEX idx_prela_codigo_prela ON Prela(codigo_prela);
-CREATE INDEX idx_prela_codigo_prelada ON Prela(codigo_prelada);
-CREATE INDEX idx_estudia_email_estudiante ON Estudia(email_estudiante);
-CREATE INDEX idx_estudia_codigo_carrera ON Estudia(codigo_carrera);
-CREATE INDEX idx_inscribe_email_estudiante ON Inscribe(email_estudiante);
-CREATE INDEX idx_inscribe_codigo_materia ON Inscribe(codigo_materia);
-CREATE INDEX idx_inscribe_seccion ON Inscribe(seccion);
-CREATE INDEX idx_genero_id_CD ON Genero(id_CD);
-CREATE INDEX idx_artista_id_CD ON Artista(id_CD);
+-- Crear un nuevo curso
+--      p_codigo_materia (VARCHAR(16)) - Código de la materia
+--      p_seccion (INT) - Sección del curso
+--      p_fecha_inicio (DATE) - Fecha de inicio del curso
+--      p_fecha_fin (DATE) - Fecha de fin del curso
+--      p_horario (VARCHAR(32)) - Horario del curso
+--      p_email_profesor (VARCHAR(254)) - Email del profesor
+CREATE OR REPLACE PROCEDURE CrearCurso (
+    p_codigo_materia VARCHAR(16),
+    p_seccion INT,
+    p_fecha_inicio DATE,
+    p_fecha_fin DATE,
+    p_horario VARCHAR(32),
+    p_email_profesor VARCHAR(254)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO Curso (codigo_materia, seccion, fecha_inicio, fecha_fin, horario, email_profesor)
+    VALUES (p_codigo_materia, p_seccion, p_fecha_inicio, p_fecha_fin, p_horario, p_email_profesor);
+END;
+$$;
 
--- Índices en columnas utilizadas en filtros de búsqueda
-CREATE INDEX idx_usuario_nombre ON Usuario(nombre);
-CREATE INDEX idx_usuario_apellido ON Usuario(apellido);
-CREATE INDEX idx_producto_nombre ON Producto(nombre);
 
--- Índices en columnas utilizadas en ordenaciones
-CREATE INDEX idx_curso_fecha_inicio ON Curso(fecha_inicio);
-CREATE INDEX idx_transaccion_fecha ON Transaccion(fecha);
+-- Cambiar profesor
+--      p_codigo_materia (VARCHAR(16)) - Codigo de la materia
+--      p_seccion (INT) - Seccion del curso
+--      p_fecha_inicio (DATE) - Fecha de inicio del curso
+--      p_nuevo_email_profesor (VARCHAR(254)) - Nuevo email del profesor
+CREATE OR REPLACE PROCEDURE CambiarProfesor (
+    p_codigo_materia VARCHAR(16),
+    p_seccion INT,
+    p_fecha_inicio DATE,
+    p_nuevo_email_profesor VARCHAR(254)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    UPDATE Curso
+    SET email_profesor = p_nuevo_email_profesor
+    WHERE codigo_materia = p_codigo_materia AND seccion = p_seccion AND fecha_inicio = p_fecha_inicio;
+END;
+$$;
 
--- Índices compuestos si es necesario (si las consultas suelen filtrar por varias columnas)
-CREATE INDEX idx_inscribe_estudiante_materia_seccion ON Inscribe(email_estudiante, codigo_materia, seccion);
+
+-- Inscribir Estudiante a una Carrera
+CREATE OR REPLACE PROCEDURE inscribir_estudiante_carrera(email_estudiante TEXT, codigo_carrera TEXT, fecha_inicio DATE) AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Carrera WHERE codigo = codigo_carrera AND EXISTS (SELECT 1 FROM Materia WHERE codigo_carrera = codigo_carrera)) THEN
+        RAISE EXCEPTION 'La carrera no tiene materias asociadas';
+    END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM Estudiante WHERE email = email_estudiante) THEN
+        INSERT INTO Estudiante (email) VALUES (email_estudiante);
+    END IF;
+
+    INSERT INTO Estudia (email_estudiante, codigo_carrera, fecha_inicio) VALUES (email_estudiante, codigo_carrera, fecha_inicio);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Inscribir Estudiante a un Curso
+CREATE OR REPLACE PROCEDURE inscribir_estudiante_curso(email_estudiante TEXT, codigo_materia TEXT, seccion INT, fecha_inicio DATE) AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Estudia WHERE email_estudiante = email_estudiante AND codigo_carrera = (SELECT codigo_carrera FROM Tiene WHERE codigo_materia = codigo_materia)) THEN
+        RAISE EXCEPTION 'El estudiante no está inscrito en la carrera asociada a la materia';
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM Requisito WHERE codigo_materia = codigo_materia AND NOT EXISTS (SELECT 1 FROM Inscribe WHERE email_estudiante = email_estudiante AND codigo_materia = Requisito.codigo_requisito AND nota > 2)) THEN
+        RAISE EXCEPTION 'El estudiante no ha aprobado las materias requisito';
+    END IF;
+
+    INSERT INTO Inscribe (email_estudiante, codigo_materia, seccion, fecha_inicio) VALUES (email_estudiante, codigo_materia, seccion, fecha_inicio);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Calificar Estudiante
+CREATE OR REPLACE PROCEDURE calificar_estudiante(email_estudiante TEXT, codigo_materia TEXT, seccion INT, nota INT) AS $$
+BEGIN
+    IF nota < 1 OR nota > 5 THEN
+        RAISE EXCEPTION 'La nota debe ser un valor entre 1 y 5';
+    END IF;
+
+    UPDATE Inscribe SET nota = nota WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Calificar Profesor
+CREATE OR REPLACE PROCEDURE calificar_profesor(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_prof INT, fecha_inicio DATE) AS $$
+BEGIN
+    IF calificacion_prof < 1 OR calificacion_prof > 5 THEN
+        RAISE EXCEPTION 'La calificación debe ser un valor entre 1 y 5';
+    END IF;
+
+    UPDATE Inscribe SET calificacion_prof = calificacion_prof WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Calificar Materia
+CREATE OR REPLACE PROCEDURE calificar_materia(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_materia INT, fecha_inicio DATE,) AS $$
+BEGIN
+    IF calificacion_materia < 1 OR calificacion_materia > 5 THEN
+        RAISE EXCEPTION 'La calificación debe ser un valor entre 1 y 5';
+    END IF;
+
+    UPDATE Inscribe SET calificacion_materia = calificacion_materia WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+--------GET---------
+
+CREATE OR REPLACE FUNCTION Obtener_Pensum(
+    codigo_carrera_entrada    VARCHAR(16)
+)
+RETURNS TABLE(
+    codigo_materia  VARCHAR(16),
+    codigo_carrera   VARCHAR(16),
+    nombre  VARCHAR(16),
+    nivel   VARCHAR(16)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM Materia WHERE Materia.codigo_carrera = codigo_carrera_entrada;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION Obtener_Registro_Transacciones(
+    emaill_cliente_entrada    VARCHAR(16)
+)
+RETURNS TABLE(
+    n_ref    INT,
+    monto_total INT,
+    fecha    DATE,
+    hora     TIME,
+    email_cliente VARCHAR(254)
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM Transaccion WHERE Transaccion.emaill_cliente = emaill_cliente_entrada ORDER BY fecha, hora;
+END
+$$;
+
+CREATE OR REPLACE FUNCTION Obtener_Productos_Transaccion(
+    id_transaccion_entrada    VARCHAR(16)
+)
+RETURNS TABLE(
+    nombre   VARCHAR(32),
+    descripcion TEXT,
+	cantidad    INT,
+    precio      INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT Producto.nombre, Producto.descripcion, Pertenece.cantidad, Pertenece.precio FROM Pertenece
+	INNER JOIN Transaccion ON Transaccion.id = Pertenece.id_transaccion
+	INNER JOIN Producto ON Producto.id = Pertenece.id_producto
+	WHERE Pertenece.id_transaccion = id_transaccion_entrada;
+	
+END
+$$;
+
+
+CREATE OR REPLACE FUNCTION Obtener_Cursos_Activos(
+)
+RETURNS TABLE(
+    nombre   VARCHAR(32),
+    descripcion TEXT,
+	cantidad    INT,
+    precio      INT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT * FROM Curso
+    WHERE fecha_inicio < CURRENT_DATE AND fecha_fin > CURRENT_DATE
+	
+END
+$$;
