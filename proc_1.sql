@@ -177,7 +177,7 @@ CREATE OR REPLACE PROCEDURE Crear_Accesorio(
     precio   DECIMAL(10,2),
     descripcion TEXT,
     marca VARCHAR(32),
-    id_instrumento INT
+    id_instrumentos INT[]
 )
 LANGUAGE plpgsql
 AS $$
@@ -188,9 +188,12 @@ BEGIN
     INSERT INTO Accesorio VALUES (
         id_producto, marca
     );
-    INSERT INTO Compatible VALUES (
-        id_instrumento, id_producto
-    );
+    FOR i IN 1..array_length(id_instrumentos) LOOP
+        INSERT INTO Compatible VALUES (
+            id_instrumentos[i], id_producto
+        );
+    END LOOP;
+
 
 END
 $$;
