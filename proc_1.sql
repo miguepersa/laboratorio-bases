@@ -563,7 +563,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Calificar Materia
-CREATE OR REPLACE PROCEDURE calificar_materia(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_materia INT, fecha_inicio DATE,) AS $$
+CREATE OR REPLACE PROCEDURE calificar_materia(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_materia INT, fecha_inicio DATE) AS $$
 BEGIN
     IF calificacion_materia < 1 OR calificacion_materia > 5 THEN
         RAISE EXCEPTION 'La calificación debe ser un valor entre 1 y 5';
@@ -643,7 +643,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     RETURN QUERY SELECT * FROM Curso
-    WHERE fecha_inicio < CURRENT_DATE AND fecha_fin > CURRENT_DATE
+    WHERE fecha_inicio < CURRENT_DATE AND fecha_fin > CURRENT_DATE;
 	
 END
 $$;
