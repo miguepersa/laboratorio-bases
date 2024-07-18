@@ -3,7 +3,6 @@
 -- Índices en claves foráneas
 CREATE INDEX idx_carrera_email_coordinador ON Carrera(email_coordinador);
 CREATE INDEX idx_materia_codigo_carrera ON Materia(codigo_carrera);
-CREATE INDEX idx_curso_codigo_materia ON Curso(fecha_inicio);
 CREATE INDEX idx_curso_email_profesor ON Curso(email_profesor);
 CREATE INDEX idx_transaccion_email_cliente ON Transaccion(email_cliente);
 CREATE INDEX idx_pertenece_id_transaccion ON Pertenece(id_transaccion);
@@ -19,8 +18,15 @@ CREATE INDEX idx_artista_id_CD ON Artista(nombre_artista);
 -- Índices en columnas utilizadas en filtros de búsqueda
 CREATE INDEX idx_usuario_nombre ON Usuario(nombre);
 CREATE INDEX idx_usuario_apellido ON Usuario(apellido);
+CREATE INDEX idx_usuario_cedula ON Usuario(cedula);
 CREATE INDEX idx_producto_nombre ON Producto(nombre);
+CREATE INDEX idx_titulo_grado_titulo ON Titulo(grado_titulo);
+CREATE INDEX idx_titulo_nombre_titulo ON Titulo(nombre_titulo);
+CREATE INDEX idx_instrumento_marca ON Instrumento(marca);
+CREATE INDEX idx_accesorio_marca ON Accesorio(marca);
 
 -- Índices en columnas utilizadas en ordenaciones
 CREATE INDEX idx_curso_fecha_inicio ON Curso(fecha_inicio);
 CREATE INDEX idx_transaccion_fecha ON Transaccion(fecha);
+CREATE INDEX idx_profesor_fecha_ingreso ON Profesor(fecha_ingreso);
+CREATE INDEX idx_producto_precio ON Producto(precio);
