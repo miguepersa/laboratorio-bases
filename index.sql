@@ -24,6 +24,7 @@ CREATE INDEX idx_inscribe_codigo_materia ON Inscribe(codigo_materia);
 CREATE INDEX idx_inscribe_seccion ON Inscribe(seccion);
 CREATE INDEX idx_genero_id_CD ON Genero(id_CD);
 CREATE INDEX idx_artista_id_CD ON Artista(id_CD);
+CREATE INDEX idx_es_categoria_padre ON Es(nombre_padre);
 
 -- Índices en columnas utilizadas en filtros de búsqueda
 CREATE INDEX idx_usuario_nombre ON Usuario(nombre);
