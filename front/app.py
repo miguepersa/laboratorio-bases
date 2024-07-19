@@ -114,7 +114,7 @@ def execute_procedure(procedure_name):
             descripcion = request.form['descripcion']
             marca = request.form['marca']
             modelo = request.form['modelo']
-            categorias = request.form.getlist('categorias')
+            categorias = request.form["categorias"].strip().split(" ")
             cur.execute("CALL Crear_Instrumento(%s, %s, %s, %s, %s, %s, %s)", 
                         (nombre, stock, precio, descripcion, marca, modelo, categorias))
 
@@ -154,7 +154,7 @@ def execute_procedure(procedure_name):
             precio = request.form['precio']
             descripcion = request.form['descripcion']
             marca = request.form['marca']
-            id_instrumentos = [int(i) for i in request.form["id_instrumentos"].split(" ")]
+            id_instrumentos = [int(i) for i in request.form["id_instrumentos"].strip().split(" ")]
             cur.execute("CALL Crear_Accesorio(%s, %s, %s, %s, %s, %s)", 
                         (nombre, stock, precio, descripcion, marca, id_instrumentos))
         
@@ -173,8 +173,8 @@ def execute_procedure(procedure_name):
         if procedure_name == 'Crear_Transaccion':
             n_ref = request.form['n_ref']
             email_cliente = request.form['email_cliente']
-            id_productos = request.form.getlist('id_productos')
-            cantidades = request.form.getlist('cantidades')
+            id_productos = [int(i) for i in request.form["id_productos"].strip().split(" ")]
+            cantidades = [int(i) for i in request.form["cantidades"].strip().split(" ")]
             cur.execute("CALL Crear_Transaccion(%s, %s, %s, %s)", 
                         (n_ref, email_cliente, id_productos, cantidades))
         
