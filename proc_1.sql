@@ -531,26 +531,19 @@ $$ LANGUAGE plpgsql;
 -- Inscribir Estudiante a un Curso
 CREATE OR REPLACE PROCEDURE inscribir_estudiante_curso(email_estudiante TEXT, codigo_materia TEXT, seccion INT, fecha_inicio DATE) AS $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM Estudia WHERE email_estudiante = email_estudiante AND codigo_carrera = (SELECT codigo_carrera FROM Tiene WHERE codigo_materia = codigo_materia)) THEN
-        RAISE EXCEPTION 'El estudiante no está inscrito en la carrera asociada a la materia';
-    END IF;
 
-    IF EXISTS (SELECT 1 FROM Requisito WHERE codigo_materia = codigo_materia AND NOT EXISTS (SELECT 1 FROM Inscribe WHERE email_estudiante = email_estudiante AND codigo_materia = Requisito.codigo_requisito AND nota > 2)) THEN
-        RAISE EXCEPTION 'El estudiante no ha aprobado las materias requisito';
-    END IF;
-
-    INSERT INTO Inscribe (email_estudiante, codigo_materia, seccion, fecha_inicio) VALUES (email_estudiante, codigo_materia, seccion, fecha_inicio);
+    INSERT INTO Inscribe(email_estudiante, codigo_materia, seccion, fecha_inicio) VALUES (email_estudiante, codigo_materia, seccion, fecha_inicio);
 END;
 $$ LANGUAGE plpgsql;
 
 -- Calificar Estudiante
-CREATE OR REPLACE PROCEDURE calificar_estudiante(email_estudiante TEXT, codigo_materia TEXT, seccion INT, nota INT) AS $$
+CREATE OR REPLACE PROCEDURE calificar_estudiante(email_estudiante TEXT, codigo_materia TEXT, seccion INT, nota INT, fecha_inicio DATE) AS $$
 BEGIN
     IF nota < 1 OR nota > 5 THEN
         RAISE EXCEPTION 'La nota debe ser un valor entre 1 y 5';
     END IF;
 
-    UPDATE Inscribe SET nota = nota WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion;
+    UPDATE Inscribe SET nota = nota WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -597,7 +590,7 @@ END
 $$;
 
 CREATE OR REPLACE FUNCTION Obtener_Registro_Transacciones(
-    emaill_cliente_entrada    VARCHAR(16)
+    email_cliente_entrada    VARCHAR(16)
 )
 RETURNS TABLE(
     n_ref    INT,
@@ -609,7 +602,7 @@ RETURNS TABLE(
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    RETURN QUERY SELECT * FROM Transaccion WHERE Transaccion.emaill_cliente = emaill_cliente_entrada ORDER BY fecha, hora;
+    RETURN QUERY SELECT * FROM Transaccion WHERE Transaccion.email_cliente = email_cliente_entrada ORDER BY fecha, hora;
 END
 $$;
 
@@ -648,5 +641,33 @@ BEGIN
     RETURN QUERY SELECT * FROM Curso
     WHERE fecha_inicio < CURRENT_DATE AND fecha_fin > CURRENT_DATE;
 	
+END
+$$;
+
+CREATE OR REPLACE FUNCTION Obtener_Instrumento_por_Categoria(
+    categoria VARCHAR(32)
+)
+RETURNS TABLE(
+    nombre   VARCHAR(32) ,
+    stock    INT,
+    precio   DECIMAL(10,2),
+    descripcion TEXT,
+    marca VARCHAR(32)  ,
+    modelo VARCHAR(32) ,
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY SELECT 
+        Producto.nombre, 
+        Producto.stock,  
+        Producto.precio,
+        Producto.descripcion,
+        Instrumento.marca,
+        Instrumento.modelo
+    FROM Instrumento
+    INNER JOIN Producto ON Instrumento.id_producto = Producto.id
+    INNER JOIN Esta_en ON Esta_en.id_instrumento = Instrumento.id_producto
+    WHERE Esta_en.nombre_categoria = categoria;
 END
 $$;
