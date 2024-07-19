@@ -1,16 +1,64 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Flask App</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for additional styling -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 100px;
+        }
+        .btn-primary, .btn-outline-primary {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 300px;
+            margin: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to My Flask App</h1>
-    <ul>
-        <li><a href="{{ url_for('tables') }}">View Tables</a></li>
-        <li><a href="{{ url_for('procedures') }}">Stored Procedures</a></li>
-        <li><a href="{{ url_for('functions') }}">Functions</a></li>
-    </ul>
+    <div class="container text-center">
+        <h1 class="display-4">Bienvenido a la BD de la Academia</h1>
+        <p class="lead">Navega mediante los siguientes botones.</p>
+        <div class="btn-container">
+            <a href="{{ url_for('tables') }}" class="btn btn-primary">View Tables</a>
+            <a href="{{ url_for('procedures') }}" class="btn btn-outline-primary">Stored Procedures</a>
+            <a href="{{ url_for('functions') }}" class="btn btn-primary">Functions</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (optional) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 </body>
 </html>

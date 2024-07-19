@@ -1,18 +1,78 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Execute Procedure: {{ procedure_name }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS for additional styling -->
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .btn-primary, .btn-outline-primary {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-outline-primary:hover {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 300px;
+            margin: auto;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Execute Procedure: {{ procedure_name }}</h1>
-    <form method="post">
-        {% for field in fields %}
-            <label for="{{ field }}">{{ field }}:</label>
-            <input type="text" id="{{ field }}" name="{{ field }}"><br>
-        {% endfor %}
-        <input type="submit" value="Execute">
-    </form>
-    <a href="{{ url_for('procedures') }}">Back to Procedures</a>
+    <div class="container">
+        <div class="text-center mb-4">
+            <h1 class="display-4">Execute Procedure: {{ procedure_name }}</h1>
+        </div>
+        <form method="post" class="mb-4">
+            {% for field in fields %}
+                <div class="form-group">
+                    <label for="{{ field }}" class="form-label">{{ field }}:</label>
+                    <input type="text" id="{{ field }}" name="{{ field }}" class="form-control">
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary">Execute</button>
+        </form>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('procedures') }}" class="btn btn-outline-primary">Back to Procedures</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (optional) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.min.js"></script>
 </body>
 </html>

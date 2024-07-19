@@ -67,8 +67,7 @@ def procedures():
         'inscribir_estudiante_carrera',
         'inscribir_estudiante_curso',
         'calificar_estudiante',
-        'calificar_profesor',
-        'calificar_materia'
+        'calificar_profesor'
     ]
     return render_template('procedures.html', procedures=procedures)
 
@@ -267,9 +266,8 @@ def execute_procedure(procedure_name):
         if procedure_name == 'inscribir_estudiante_carrera':
             email_estudiante = request.form['email_estudiante']
             codigo_carrera = request.form['codigo_carrera']
-            fecha_inicio = request.form['fecha_inicio']
-            cur.execute("CALL inscribir_estudiante_carrera(%s, %s, %s)", 
-                        (email_estudiante, codigo_carrera, fecha_inicio))
+            cur.execute("CALL inscribir_estudiante_carrera(%s, %s)", 
+                        (email_estudiante, codigo_carrera))
         
         if procedure_name == 'inscribir_estudiante_curso':
             email_estudiante = request.form['email_estudiante']
@@ -286,7 +284,7 @@ def execute_procedure(procedure_name):
             nota = request.form['nota']
             fecha_inicio = request.form['fecha_inicio']
             cur.execute("CALL calificar_estudiante(%s, %s, %s, %s, %s)", 
-                        (email_estudiante, codigo_materia, seccion, nota, fecha_inicio))
+                        (email_estudiante, codigo_materia, seccion, fecha_inicio, nota))
         
         if procedure_name == 'calificar_profesor':
             email_estudiante = request.form['email_estudiante']
@@ -297,14 +295,6 @@ def execute_procedure(procedure_name):
             cur.execute("CALL calificar_profesor(%s, %s, %s, %s, %s)", 
                         (email_estudiante, codigo_materia, seccion, calificacion_prof, fecha_inicio))
         
-        if procedure_name == 'calificar_materia':
-            email_estudiante = request.form['email_estudiante']
-            codigo_materia = request.form['codigo_materia']
-            seccion = request.form['seccion']
-            calificacion_materia = request.form['calificacion_materia']
-            fecha_inicio = request.form['fecha_inicio']
-            cur.execute("CALL calificar_materia(%s, %s, %s, %s, %s)", 
-                        (email_estudiante, codigo_materia, seccion, calificacion_materia, fecha_inicio))
         
         conn.commit()
         cur.close()
@@ -359,15 +349,13 @@ def execute_procedure(procedure_name):
     if procedure_name == 'CambiarProfesor':
         fields = ['p_codigo_materia', 'p_seccion', 'p_fecha_inicio', 'p_nuevo_email_profesor']
     if procedure_name == 'inscribir_estudiante_carrera':
-        fields = ['email_estudiante', 'codigo_carrera', 'fecha_inicio']
+        fields = ['email_estudiante', 'codigo_carrera']
     if procedure_name == 'inscribir_estudiante_curso':
         fields = ['email_estudiante', 'codigo_materia', 'seccion', 'fecha_inicio']
     if procedure_name == 'calificar_estudiante':
         fields = ['email_estudiante', 'codigo_materia', 'seccion', 'nota', 'fecha_inicio']
     if procedure_name == 'calificar_profesor':
         fields = ['email_estudiante', 'codigo_materia', 'seccion', 'calificacion_prof', 'fecha_inicio']
-    if procedure_name == 'calificar_materia':
-        fields = ['email_estudiante', 'codigo_materia', 'seccion', 'calificacion_materia', 'fecha_inicio']
     
     return render_template('execute_procedure.html', procedure_name=procedure_name, fields=fields)
 

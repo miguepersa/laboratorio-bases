@@ -73,8 +73,8 @@ BEGIN
         id_producto, marca, modelo
     );
 
-    FOR i IN 1..array_length(categorias) LOOP
-        IF NOT EXISTS (SELECT * FROM Categoria WHERE nombre = categorias[i]) THEN
+    FOR i IN 1..array_length(categorias, 1) LOOP
+        IF NOT EXISTS (SELECT * FROM Categoria WHERE Categoria.nombre = categorias[i]) THEN
             CALL Crear_Categoria(categorias[i]);
         END IF;
         CALL Asignar_Categoria_a_Instrumento(id_producto, categorias[i]);
@@ -188,7 +188,7 @@ BEGIN
     INSERT INTO Accesorio VALUES (
         id_producto, marca
     );
-    FOR i IN 1..array_length(id_instrumentos) LOOP
+    FOR i IN 1..array_length(id_instrumentos, 1) LOOP
         INSERT INTO Compatible VALUES (
             id_instrumentos[i], id_producto
         );
@@ -219,14 +219,14 @@ $$;
     -- precio INT - nuevo precio del producto
 CREATE OR REPLACE PROCEDURE Actualizar_precio (
     id_producto  INT,
-    precio   DECIMAL(10,2)
+    precio_entrada   DECIMAL(10,2)
 
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     UPDATE Producto
-    SET Producto.precio = precio
+    SET precio = precio_entrada
     WHERE id = id_producto;
 END
 $$;
@@ -259,13 +259,13 @@ BEGIN
         DEFAULT, n_ref, 0, CURRENT_DATE, CURRENT_TIME, email_cliente
     ) RETURNING id INTO id_transaccion;
 
-    FOR i IN 1..array_length(id_productos) LOOP
+    FOR i IN 1..array_length(id_productos, 1) LOOP
     
         SELECT Producto.stock, Producto.precio INTO stock, precio FROM Producto WHERE id = id_productos[i];
         CALL Actualizar_Stock(id_productos[i], stock - cantidades[i]);
  
         INSERT INTO Pertenece VALUES (
-            id_productos[i], id_transaccion, candidades[i], precio
+            id_productos[i], id_transaccion, cantidades[i], precio
         );
 
         UPDATE Transaccion 
@@ -326,7 +326,7 @@ CREATE OR REPLACE PROCEDURE Crear_Materia(
     codigo_carrera   VARCHAR(16),
     nombre  VARCHAR(16),
     nivel   VARCHAR(16),
-    categoria VARCHAR(32)
+    categoria_entrada VARCHAR(32)
 )
 LANGUAGE plpgsql
 AS $$
@@ -334,10 +334,10 @@ BEGIN
     INSERT INTO Materia VALUES (
         codigo_materia, codigo_carrera, nombre, nivel
     );
-    IF NOT EXISTS (SELECT * FROM Categoria WHERE nombre = categoria) THEN
-        CALL Crear_Categoria(categoria);
+    IF NOT EXISTS (SELECT * FROM Categoria WHERE Categoria.nombre = categoria_entrada) THEN
+        CALL Crear_Categoria(categoria_entrada);
     END IF;
-    CALL Asignar_Categoria_a_Materia(codigo_materia, categoria);
+    CALL Asignar_Categoria_a_Materia(codigo_materia, categoria_entrada);
 END
 $$;
 
@@ -352,7 +352,7 @@ LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO De VALUES (
-        id_instrumento, nombre_categoria
+        nombre_categoria, codigo_materia
     );
 END;
 $$;
@@ -379,21 +379,21 @@ END
 $$;
 
 CREATE OR REPLACE PROCEDURE Cambiar_Coordinador(
-    codigo_carrera  VARCHAR(16),   
-    email_coordinador    VARCHAR(254)
+    codigo_carrera_entrada  VARCHAR(16),   
+    email_coordinador_entrada    VARCHAR(254)
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
     UPDATE Carrera
-    SET Carrera.email_coordinador = email_coordinador
-    WHERE Carrera.codigo_carrera = codigo_carrera;
+    SET email_coordinador = email_coordinador_entrada
+    WHERE codigo_carrera = codigo_carrera_entrada;
 END
 $$;
 
 CREATE OR REPLACE PROCEDURE Graduarse(
-    email_estudiante  VARCHAR(254),
-    codigo_carrera  VARCHAR(16)   
+    email_estudiante_entrada  VARCHAR(254),
+    codigo_carrera_entrada  VARCHAR(16)   
 )
 LANGUAGE plpgsql
 AS $$
@@ -403,12 +403,12 @@ DECLARE
 BEGIN
 
     SELECT COUNT(*) INTO materias From Materia
-    WHERE Materia.codigo_carrera = codigo_carrera;
+    WHERE Materia.codigo_carrera = codigo_carrera_entrada;
 
     SELECT COUNT(DISTINCT Inscribe.codigo_materia) INTO notas FROM Inscribe 
     INNER JOIN Materia ON Materia.codigo_materia = Inscribe.codigo_materia
-    WHERE Inscribe.email_estudiante = email_estudiante
-    AND Materia.codigo_carrera = codigo_carrera
+    WHERE Inscribe.email_estudiante = email_estudiante_entrada
+    AND Materia.codigo_carrera = codigo_carrera_entrada
     AND Inscribe.nota > 2;
     
     IF materias != notas THEN
@@ -417,7 +417,7 @@ BEGIN
 
     UPDATE Estudia 
     SET fecha_fin = CURRENT_DATE
-    WHERE Estudia.email_estudiante = email_estudiante;
+    WHERE Estudia.email_estudiante = email_estudiante_entrada;
 
 END
 $$;
@@ -449,10 +449,10 @@ END
 $$;
 
 CREATE OR REPLACE PROCEDURE Calificar_Materia(
-    email_estudiante  VARCHAR(16),   
-    codigo_materia    VARCHAR(254),
-    seccion INT,
-    fecha_inicio    DATE,
+    email_estudiante_entrada  VARCHAR(16),   
+    codigo_materia_entrada    VARCHAR(254),
+    seccion_entrada INT,
+    fecha_inicio_entrada    DATE,
     calificacion INT
 )
 LANGUAGE plpgsql
@@ -460,10 +460,10 @@ AS $$
 BEGIN
     UPDATE Inscribe
     SET calificacion_materia = calificacion
-    WHERE Inscribe.email_estudiante = email_estudiante
-    AND Inscribe.codigo_materia = codigo_materia
-    AND Inscribe.seccion = seccion
-    AND Inscribe.fecha_inicio = fecha_inicio;
+    WHERE Inscribe.email_estudiante = email_estudiante_entrada
+    AND Inscribe.codigo_materia = codigo_materia_entrada
+    AND Inscribe.seccion = seccion_entrada
+    AND Inscribe.fecha_inicio = fecha_inicio_entrada;
 END
 $$;
 
@@ -514,58 +514,87 @@ $$;
 
 
 -- Inscribir Estudiante a una Carrera
-CREATE OR REPLACE PROCEDURE inscribir_estudiante_carrera(email_estudiante TEXT, codigo_carrera TEXT, fecha_inicio DATE) AS $$
+CREATE OR REPLACE PROCEDURE inscribir_estudiante_carrera(email_estudiante TEXT, codigo_carrera TEXT) AS $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM Carrera WHERE codigo = codigo_carrera AND EXISTS (SELECT 1 FROM Materia WHERE codigo_carrera = codigo_carrera)) THEN
-        RAISE EXCEPTION 'La carrera no tiene materias asociadas';
-    END IF;
 
     IF NOT EXISTS (SELECT 1 FROM Estudiante WHERE email = email_estudiante) THEN
         INSERT INTO Estudiante (email) VALUES (email_estudiante);
     END IF;
 
-    INSERT INTO Estudia (email_estudiante, codigo_carrera, fecha_inicio) VALUES (email_estudiante, codigo_carrera, fecha_inicio);
+    INSERT INTO Estudia (email_estudiante, codigo_carrera, fecha_inicio) VALUES (email_estudiante, codigo_carrera, CURRENT_DATE);
 END;
 $$ LANGUAGE plpgsql;
 
 -- Inscribir Estudiante a un Curso
-CREATE OR REPLACE PROCEDURE inscribir_estudiante_curso(email_estudiante TEXT, codigo_materia TEXT, seccion INT, fecha_inicio DATE) AS $$
+CREATE OR REPLACE PROCEDURE inscribir_estudiante_curso(email_estudiante_entrada TEXT, codigo_materia_entrada TEXT, seccion_entrada INT, fecha_inicio_entrada DATE) 
+AS $$
 BEGIN
 
-    INSERT INTO Inscribe(email_estudiante, codigo_materia, seccion, fecha_inicio) VALUES (email_estudiante, codigo_materia, seccion, fecha_inicio);
-END;
+	CREATE TEMP TABLE requisitos AS
+    WITH RECURSIVE x AS
+        (
+            -- anchor:
+            SELECT Materia.codigo_materia as codigo FROM Materia
+            WHERE codigo_materia = codigo_materia_entrada
+            
+            
+            UNION ALL
+            
+            -- recursive:
+            SELECT Materia.codigo_materia as codigo
+            FROM x 
+            INNER JOIN Prela ON x.codigo = Prela.codigo_prelada 
+            INNER JOIN Materia ON Materia.codigo_materia = Prela.codigo_prela
+            
+        )
+        SELECT codigo FROM x where codigo != codigo_materia_entrada;
+
+    IF (SELECT COUNT(*) from requisitos) != (
+            SELECT COUNT(*) from requisitos 
+            INNER JOIN inscribe ON inscribe.codigo_materia = requisitos.codigo
+            where 
+            inscribe.email_estudiante = email_estudiante_entrada AND 
+            inscribe.nota > 2
+        ) THEN
+        RAISE EXCEPTION 'los requisitos no han sido aprobados';
+    END IF;
+
+
+    INSERT INTO Inscribe(email_estudiante, codigo_materia, seccion, fecha_inicio) VALUES (email_estudiante_entrada, codigo_materia_entrada, seccion_entrada, fecha_inicio_entrada);
+END
 $$ LANGUAGE plpgsql;
 
 -- Calificar Estudiante
-CREATE OR REPLACE PROCEDURE calificar_estudiante(email_estudiante TEXT, codigo_materia TEXT, seccion INT, nota INT, fecha_inicio DATE) AS $$
+CREATE OR REPLACE PROCEDURE calificar_estudiante(
+    email_estudiante_entrada TEXT, 
+    codigo_materia_entrada TEXT, 
+    seccion_entrada INT,
+    fecha_inicio_entrada DATE,
+    nota_entrada INT 
+) AS $$
 BEGIN
-    IF nota < 1 OR nota > 5 THEN
+    IF nota_entrada < 1 OR nota_entrada > 5 THEN
         RAISE EXCEPTION 'La nota debe ser un valor entre 1 y 5';
     END IF;
 
-    UPDATE Inscribe SET nota = nota WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
+    UPDATE Inscribe SET nota = nota_entrada WHERE Inscribe.email_estudiante = email_estudiante_entrada AND codigo_materia = codigo_materia_entrada AND seccion = seccion_entrada AND fecha_inicio = fecha_inicio_entrada;
 END;
 $$ LANGUAGE plpgsql;
 
 -- Calificar Profesor
-CREATE OR REPLACE PROCEDURE calificar_profesor(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_prof INT, fecha_inicio DATE) AS $$
+CREATE OR REPLACE PROCEDURE calificar_profesor(
+    email_estudiante_entrada TEXT, 
+    codigo_materia_entrada TEXT, 
+    seccion_entrada INT, 
+    calificacion_prof_entrada INT, 
+    fecha_inicio_entrada DATE
+) AS $$
 BEGIN
-    IF calificacion_prof < 1 OR calificacion_prof > 5 THEN
+    IF calificacion_prof_entrada < 1 OR calificacion_prof_entrada > 5 THEN
         RAISE EXCEPTION 'La calificación debe ser un valor entre 1 y 5';
     END IF;
 
-    UPDATE Inscribe SET calificacion_prof = calificacion_prof WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
-END;
-$$ LANGUAGE plpgsql;
-
--- Calificar Materia
-CREATE OR REPLACE PROCEDURE calificar_materia(email_estudiante TEXT, codigo_materia TEXT, seccion INT, calificacion_materia INT, fecha_inicio DATE) AS $$
-BEGIN
-    IF calificacion_materia < 1 OR calificacion_materia > 5 THEN
-        RAISE EXCEPTION 'La calificación debe ser un valor entre 1 y 5';
-    END IF;
-
-    UPDATE Inscribe SET calificacion_materia = calificacion_materia WHERE email_estudiante = email_estudiante AND codigo_materia = codigo_materia AND seccion = seccion AND fecha_inicio = fecha_inicio;
+    UPDATE Inscribe SET calificacion_prof = calificacion_prof_entrada WHERE email_estudiante = email_estudiante_entrada AND codigo_materia = codigo_materia_entrada AND seccion = seccion_entrada AND fecha_inicio = fecha_inicio_entrada;
 END;
 $$ LANGUAGE plpgsql;
 
