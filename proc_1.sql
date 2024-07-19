@@ -653,7 +653,7 @@ RETURNS TABLE(
     precio   DECIMAL(10,2),
     descripcion TEXT,
     marca VARCHAR(32)  ,
-    modelo VARCHAR(32) ,
+    modelo VARCHAR(32) 
 )
 LANGUAGE plpgsql
 AS $$
