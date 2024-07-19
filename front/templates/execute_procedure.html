@@ -1,0 +1,18 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Execute Procedure: {{ procedure_name }}</title>
+</head>
+<body>
+    <h1>Execute Procedure: {{ procedure_name }}</h1>
+    <form method="post">
+        {% for field in fields %}
+            <label for="{{ field }}">{{ field }}:</label>
+            <input type="text" id="{{ field }}" name="{{ field }}"><br>
+        {% endfor %}
+        <input type="submit" value="Execute">
+    </form>
+    <a href="{{ url_for('procedures') }}">Back to Procedures</a>
+</body>
+</html>

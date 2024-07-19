@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Execute Function: {{ function_name }}</title>
+</head>
+<body>
+    <h1>Execute Function: {{ function_name }}</h1>
+    <form method="post">
+        {% for field in fields %}
+            <label for="{{ field }}">{{ field }}:</label>
+            <input type="text" id="{{ field }}" name="{{ field }}"><br>
+        {% endfor %}
+        <input type="submit" value="Execute">
+    </form>
+    {% if result %}
+        <h2>Result:</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    {% for column in result[0] %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in result %}
+                    <tr>
+                        {% for item in row %}
+                            <td>{{ item }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    <a href="{{ url_for('functions') }}">Back to Functions</a>
+</body>
+</html>

@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Functions</title>
+</head>
+<body>
+    <h1>Functions</h1>
+    <ul>
+        {% for function in functions %}
+            <li><a href="{{ url_for('execute_function', function_name=function) }}">{{ function }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+</body>
+</html>

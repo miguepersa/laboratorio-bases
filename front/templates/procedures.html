@@ -1,0 +1,16 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stored Procedures</title>
+</head>
+<body>
+    <h1>Stored Procedures</h1>
+    <ul>
+        {% for procedure in procedures %}
+            <li><a href="{{ url_for('execute_procedure', procedure_name=procedure) }}">{{ procedure }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Back to Home</a>
+</body>
+</html>
